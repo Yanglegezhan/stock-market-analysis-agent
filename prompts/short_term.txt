@@ -17,7 +17,7 @@
 
 ## 输出格式
 
-请严格按以下JSON格式输出次日预期，不要添加任何其他内容：
+**重要：你必须且只能输出下面的JSON格式，不要输出任何其他文字、解释或分析！**
 
 ```json
 {
@@ -25,23 +25,26 @@
     {
       "scenario": "场景名称（如：压力位上方开盘）",
       "probability": "概率评估（高/中/低）",
-      "expectation": "预期走势",
-      "target_levels": [目标位列表],
-      "stop_levels": [止损位列表]
+      "expectation": "预期走势描述",
+      "target_levels": [目标价格列表],
+      "stop_levels": [止损价格列表]
     }
   ],
   "key_levels_to_watch": [
-    {"price": 数值, "significance": "意义说明"}
+    {"price": 价格数值, "significance": "意义说明"}
   ],
-  "operation_suggestion": "操作建议",
-  "confidence": "high/medium/low",
-  "risk_warning": "风险提示"
+  "operation_suggestion": "具体操作建议",
+  "confidence": "high或medium或low",
+  "risk_warning": "风险提示内容"
 }
 ```
 
-## 要求
+## 强制要求
 
-1. 给出2-3个可能的开盘场景及对应预期
-2. 每个场景包含目标位和止损位
-3. 给出明确的操作建议
-4. 标注置信度和风险提示
+1. **输出只能是上面的JSON格式**，不要添加任何其他内容
+2. 必须包含opening_scenarios数组，至少2个场景
+3. 每个场景必须包含scenario、probability、expectation、target_levels、stop_levels五个字段
+4. 必须包含key_levels_to_watch数组
+5. 必须包含operation_suggestion字段
+6. confidence只能是high、medium、low三个值之一
+7. 所有价格必须是数值类型，不要加引号

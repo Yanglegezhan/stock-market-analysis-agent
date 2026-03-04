@@ -781,19 +781,79 @@ class LLMResponseParser:
     @classmethod
     def parse_short_term(cls, text: str) -> Optional[ShortTermExpectation]:
         """解析短期预期响应
-        
+
         Args:
             text: LLM响应文本
-            
+
         Returns:
             ShortTermExpectation对象，解析失败返回None
         """
         data = cls.extract_json(text)
         if data is None:
             return None
-        
+
         try:
-            return ShortTermExpectation.from_dict(data)
+            # 检查是否有标准格式的字段
+            if "opening_scenarios" in data:
+                return ShortTermExpectation.from_dict(data)
+
+            # 兼容MiniMax等模型的非标准输出格式
+            # 尝试从其他字段构建标准格式
+            scenarios = []
+
+            # 如果有prediction字段，构建一个默认场景
+            if "prediction" in data:
+                direction = data.get("direction", "震荡")
+                target = data.get("target_price", 0)
+                stop = data.get("stop_loss", 0)
+
+                scenario = {
+                    "scenario": f"基于分析的方向：{direction}",
+                    "probability": "中",
+                    "expectation": data.get("prediction", ""),
+                    "target_levels": [target] if target else [],
+                    "stop_levels": [stop] if stop else []
+                }
+                scenarios.append(scenario)
+
+            # 如果没有场景但有其他内容，创建默认场景
+            if not scenarios:
+                scenarios.append({
+                    "scenario": "默认预期",
+                    "probability": "中",
+                    "expectation": str(data),
+                    "target_levels": [],
+                    "stop_levels": []
+                })
+
+            confidence_map = {
+                "high": Confidence.HIGH,
+                "medium": Confidence.MEDIUM,
+                "low": Confidence.LOW,
+                "高": Confidence.HIGH,
+                "中": Confidence.MEDIUM,
+                "低": Confidence.LOW,
+            }
+
+            return ShortTermExpectation(
+                opening_scenarios=[
+                    OpeningScenario(
+                        scenario=s.get("scenario", ""),
+                        probability=s.get("probability", "中"),
+                        expectation=s.get("expectation", ""),
+                        target_levels=s.get("target_levels", []),
+                        stop_levels=s.get("stop_levels", []),
+                    )
+                    for s in scenarios
+                ],
+                key_levels_to_watch=[],
+                operation_suggestion=data.get("operation_suggestion", data.get("prediction", "")),
+                confidence=confidence_map.get(
+                    str(data.get("confidence", "medium")).lower(),
+                    Confidence.MEDIUM
+                ),
+                risk_warning=data.get("risk_warning", ""),
+            )
         except Exception:
             return None
     

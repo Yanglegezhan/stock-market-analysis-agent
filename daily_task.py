@@ -23,8 +23,15 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='repla
 PROJECT_DIR = Path(__file__).parent
 FEISHU_WEBHOOK = os.environ.get("FEISHU_WEBHOOK", "https://open.feishu.cn/open-apis/bot/v2/hook/1690b295-e029-4752-ba3b-cbd3013ded56")
 
+# 飞书应用凭证（用于上传图片）
+FEISHU_APP_ID = os.environ.get("FEISHU_APP_ID", "cli_a92d4c6f20b8dcba")
+FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "pLWa0fVSBTK56l3X4m94MbdKfjfjCIKI")
+
 # 飞书消息长度限制（约30KB）
 FEISHU_MSG_LIMIT = 30000
+
+# Token缓存
+_token_cache = {"token": None, "expire_time": None}
 
 
 def run_analysis(analysis_date: Optional[datetime] = None) -> dict:
@@ -291,128 +298,141 @@ def send_error_notification(error: str) -> bool:
         return False
 
 
-def send_image_to_feishu(image_path: str) -> Optional[str]:
+def get_feishu_token() -> Optional[str]:
+    """获取飞书 tenant_access_token，带缓存"""
+    global _token_cache
+
+    # 检查缓存是否有效
+    if _token_cache["token"] and _token_cache["expire_time"]:
+        if datetime.now() < _token_cache["expire_time"]:
+            return _token_cache["token"]
+
+    # 获取新token
+    url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
+    headers = {"Content-Type": "application/json; charset=utf-8"}
+    data = {
+        "app_id": FEISHU_APP_ID,
+        "app_secret": FEISHU_APP_SECRET
+    }
+
+    try:
+        response = httpx.post(url, headers=headers, json=data, timeout=30)
+        result = response.json()
+
+        if result.get("code") == 0:
+            token = result["tenant_access_token"]
+            # 提前5分钟过期，避免边界问题
+            expire_seconds = result.get("expire", 7200) - 300
+            _token_cache["token"] = token
+            _token_cache["expire_time"] = datetime.now() + timedelta(seconds=expire_seconds)
+            print(f"  获取飞书Token成功，有效期: {expire_seconds // 60} 分钟")
+            return token
+        else:
+            print(f"获取飞书Token失败: {result}")
+            return None
+    except Exception as e:
+        print(f"获取飞书Token异常: {e}")
+        return None
+
+
+def upload_image_to_feishu(image_path: str) -> Optional[str]:
     """上传图片到飞书并返回 image_key
 
-    注意：webhook机器人无法直接上传图片，这里使用base64编码
-    实际上传需要使用飞书开放平台API和access_token
+    使用飞书开放平台API上传图片，获取image_key后可直接显示在消息中
     """
     if not image_path or not Path(image_path).exists():
         print(f"图片文件不存在: {image_path}")
         return None
 
     try:
+        # 获取token
+        token = get_feishu_token()
+        if not token:
+            print("无法获取飞书Token，跳过图片上传")
+            return None
+
         # 读取图片
         with open(image_path, "rb") as f:
             image_data = f.read()
 
         # 检查图片大小（飞书限制10MB）
         if len(image_data) > 10 * 1024 * 1024:
-            print("图片过大，跳过发送")
+            print("图片过大（超过10MB），跳过发送")
             return None
 
-        print(f"  图片大小: {len(image_data) / 1024:.1f} KB")
-        return image_path  # 返回路径供后续使用
+        print(f"  正在上传图片到飞书 ({len(image_data) / 1024:.1f} KB)...")
+
+        # 上传图片
+        url = "https://open.feishu.cn/open-apis/im/v1/images"
+        headers = {"Authorization": f"Bearer {token}"}
+        files = {
+            "image_type": (None, "message"),
+            "image": (Path(image_path).name, image_data, "image/png")
+        }
+
+        response = httpx.post(url, headers=headers, files=files, timeout=60)
+        result = response.json()
+
+        if result.get("code") == 0:
+            image_key = result["data"]["image_key"]
+            print(f"  图片上传成功，image_key: {image_key}")
+            return image_key
+        else:
+            print(f"  图片上传失败: {result}")
+            return None
 
     except Exception as e:
-        print(f"处理图片失败: {e}")
+        print(f"上传图片异常: {e}")
         return None
 
 
-def send_image_message_to_feishu(image_path: str) -> bool:
-    """发送图片消息到飞书（使用image消息类型）"""
-    if not image_path or not Path(image_path).exists():
+def send_image_by_key_to_feishu(image_key: str) -> bool:
+    """使用 image_key 发送图片消息到飞书（图片会直接显示）"""
+    if not image_key:
         return False
+
+    message = {
+        "msg_type": "image",
+        "content": {
+            "image_key": image_key
+        }
+    }
 
     try:
-        # 读取图片并转为base64
-        with open(image_path, "rb") as f:
-            image_data = f.read()
-
-        import base64
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
-
-        # 飞书图片消息格式
-        message = {
-            "msg_type": "image",
-            "content": {
-                "image_key": image_base64  # 这里需要实际的 image_key
-            }
-        }
-
         response = httpx.post(FEISHU_WEBHOOK, json=message, timeout=30)
+        result = response.json()
 
-        if response.status_code == 200:
-            result = response.json()
-            if result.get("code") == 0:
-                return True
-            else:
-                # 图片消息类型可能不支持，尝试用卡片消息
-                return False
-        return False
-
+        # Webhook返回的code字段可能是StatusCode
+        if result.get("code") == 0 or result.get("StatusCode") == 0:
+            print(f"  图片消息发送成功！")
+            return True
+        else:
+            print(f"  图片消息发送失败: {result}")
+            return False
     except Exception as e:
-        print(f"发送图片失败: {e}")
+        print(f"发送图片消息异常: {e}")
         return False
 
 
 def send_chart_to_feishu(chart_path: str) -> bool:
-    """发送图表到飞书
+    """发送图表到飞书（图片直接显示，无需点击链接）
 
-    流程：1. 上传图片到 catbox.moe 图床  2. 发送图片链接到飞书
+    流程：1. 上传图片到飞书获取 image_key  2. 使用 image_key 发送图片消息
     """
     if not chart_path or not Path(chart_path).exists():
         print(f"图表文件不存在: {chart_path}")
         return False
 
-    try:
-        # 读取图片
-        with open(chart_path, "rb") as f:
-            image_data = f.read()
+    print(f"  正在处理图表...")
 
-        print(f"  正在上传图表到图床 ({len(image_data) / 1024:.1f} KB)...")
-
-        # 使用 catbox.moe 免费图床
-        url = "https://catbox.moe/user/api.php"
-        files = {"fileToUpload": ("chart.png", image_data, "image/png")}
-        data = {"reqtype": "fileupload"}
-
-        response = httpx.post(url, files=files, data=data, timeout=60)
-
-        if response.status_code == 200 and response.text.startswith("http"):
-            image_url = response.text.strip()
-            print(f"  图表上传成功: {image_url}")
-
-            # 发送到飞书（使用 post 消息类型）
-            message = {
-                "msg_type": "post",
-                "content": {
-                    "post": {
-                        "zh_cn": {
-                            "title": "K线图",
-                            "content": [
-                                [{"tag": "text", "text": "点击链接查看K线图："}],
-                                [{"tag": "a", "text": "查看图表", "href": image_url}]
-                            ]
-                        }
-                    }
-                }
-            }
-
-            resp = httpx.post(FEISHU_WEBHOOK, json=message, timeout=30)
-            if resp.status_code == 200 and resp.json().get("StatusCode") == 0:
-                print(f"  图表发送成功")
-                return True
-            else:
-                print(f"  图表发送失败: {resp.text[:100]}")
-                return False
-        else:
-            print(f"  图表上传失败: {response.text[:100]}")
-            return False
-
-    except Exception as e:
-        print(f"发送图表失败: {e}")
+    # 上传图片获取 image_key
+    image_key = upload_image_to_feishu(chart_path)
+    if not image_key:
+        print("  图表上传失败，无法发送")
         return False
+
+    # 发送图片消息
+    return send_image_by_key_to_feishu(image_key)
 
 
 def main():
