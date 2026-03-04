@@ -291,6 +291,130 @@ def send_error_notification(error: str) -> bool:
         return False
 
 
+def send_image_to_feishu(image_path: str) -> Optional[str]:
+    """上传图片到飞书并返回 image_key
+
+    注意：webhook机器人无法直接上传图片，这里使用base64编码
+    实际上传需要使用飞书开放平台API和access_token
+    """
+    if not image_path or not Path(image_path).exists():
+        print(f"图片文件不存在: {image_path}")
+        return None
+
+    try:
+        # 读取图片
+        with open(image_path, "rb") as f:
+            image_data = f.read()
+
+        # 检查图片大小（飞书限制10MB）
+        if len(image_data) > 10 * 1024 * 1024:
+            print("图片过大，跳过发送")
+            return None
+
+        print(f"  图片大小: {len(image_data) / 1024:.1f} KB")
+        return image_path  # 返回路径供后续使用
+
+    except Exception as e:
+        print(f"处理图片失败: {e}")
+        return None
+
+
+def send_image_message_to_feishu(image_path: str) -> bool:
+    """发送图片消息到飞书（使用image消息类型）"""
+    if not image_path or not Path(image_path).exists():
+        return False
+
+    try:
+        # 读取图片并转为base64
+        with open(image_path, "rb") as f:
+            image_data = f.read()
+
+        import base64
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+
+        # 飞书图片消息格式
+        message = {
+            "msg_type": "image",
+            "content": {
+                "image_key": image_base64  # 这里需要实际的 image_key
+            }
+        }
+
+        response = httpx.post(FEISHU_WEBHOOK, json=message, timeout=30)
+
+        if response.status_code == 200:
+            result = response.json()
+            if result.get("code") == 0:
+                return True
+            else:
+                # 图片消息类型可能不支持，尝试用卡片消息
+                return False
+        return False
+
+    except Exception as e:
+        print(f"发送图片失败: {e}")
+        return False
+
+
+def send_chart_to_feishu(chart_path: str) -> bool:
+    """发送图表到飞书
+
+    流程：1. 上传图片到 catbox.moe 图床  2. 发送图片链接到飞书
+    """
+    if not chart_path or not Path(chart_path).exists():
+        print(f"图表文件不存在: {chart_path}")
+        return False
+
+    try:
+        # 读取图片
+        with open(chart_path, "rb") as f:
+            image_data = f.read()
+
+        print(f"  正在上传图表到图床 ({len(image_data) / 1024:.1f} KB)...")
+
+        # 使用 catbox.moe 免费图床
+        url = "https://catbox.moe/user/api.php"
+        files = {"fileToUpload": ("chart.png", image_data, "image/png")}
+        data = {"reqtype": "fileupload"}
+
+        response = httpx.post(url, files=files, data=data, timeout=60)
+
+        if response.status_code == 200 and response.text.startswith("http"):
+            image_url = response.text.strip()
+            print(f"  图表上传成功: {image_url}")
+
+            # 发送到飞书（使用 post 消息类型）
+            message = {
+                "msg_type": "post",
+                "content": {
+                    "post": {
+                        "zh_cn": {
+                            "title": "K线图",
+                            "content": [
+                                [{"tag": "text", "text": "点击链接查看K线图："}],
+                                [{"tag": "a", "text": "查看图表", "href": image_url}]
+                            ]
+                        }
+                    }
+                }
+            }
+
+            resp = httpx.post(FEISHU_WEBHOOK, json=message, timeout=30)
+            if resp.status_code == 200 and resp.json().get("StatusCode") == 0:
+                print(f"  图表发送成功")
+                return True
+            else:
+                print(f"  图表发送失败: {resp.text[:100]}")
+                return False
+        else:
+            print(f"  图表上传失败: {response.text[:100]}")
+            return False
+
+    except Exception as e:
+        print(f"发送图表失败: {e}")
+        return False
+
+
 def main():
     """主函数"""
     print("=" * 50)
@@ -325,6 +449,11 @@ def main():
             print(f"[{datetime.now()}] 发送完整报告...")
             success_count = send_full_report_to_feishu(md_content)
             print(f"[{datetime.now()}] 完整报告发送完成 ({success_count} 条消息)")
+
+    # 发送图表
+    if result.get("chart_file"):
+        print(f"[{datetime.now()}] 发送图表...")
+        send_chart_to_feishu(result["chart_file"])
 
     print("=" * 50)
     print(f"[{datetime.now()}] 任务完成")
