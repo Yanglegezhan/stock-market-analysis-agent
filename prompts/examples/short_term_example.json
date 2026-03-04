@@ -1,0 +1,41 @@
+{
+  "input": {
+    "current_price": 3050.25,
+    "nearest_support": 3040.10,
+    "nearest_resistance": 3080.00,
+    "position": "中间偏支撑"
+  },
+  "output": {
+    "opening_scenarios": [
+      {
+        "scenario": "高开于3060上方",
+        "probability": "中",
+        "expectation": "有望挑战3080压力位，若放量突破则看3100",
+        "target_levels": [3080, 3100],
+        "stop_levels": [3050, 3040]
+      },
+      {
+        "scenario": "平开于3045-3055区间",
+        "probability": "高",
+        "expectation": "震荡整理为主，关注3040支撑和3060压力",
+        "target_levels": [3060, 3080],
+        "stop_levels": [3040, 3020]
+      },
+      {
+        "scenario": "低开于3040下方",
+        "probability": "低",
+        "expectation": "考验MA10支撑3020，若失守则看MA20的3000整数关口",
+        "target_levels": [3040, 3050],
+        "stop_levels": [3020, 3000]
+      }
+    ],
+    "key_levels_to_watch": [
+      {"price": 3080, "significance": "15分钟前高，突破确认短期强势"},
+      {"price": 3040, "significance": "MA5支撑，跌破转弱"},
+      {"price": 3000, "significance": "MA20+整数关口，重要心理支撑"}
+    ],
+    "operation_suggestion": "当前位置偏中性，建议观望为主。若突破3060可轻仓跟进，止损3040；若跌破3040则观望等待3020附近企稳信号",
+    "confidence": "medium",
+    "risk_warning": "临近重要压力位，追高风险较大；若大盘整体情绪转弱，支撑位可能失效"
+  }
+}

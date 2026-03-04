@@ -1,0 +1,22 @@
+{
+  "input": {
+    "current_price": 3050.25,
+    "daily_summary": "最近20日高点3100.50，低点2980.30，今日收盘3050.25",
+    "ma_positions": "MA5=3040.10, MA10=3020.50, MA20=3000.80, MA60=2950.20"
+  },
+  "output": {
+    "support_levels": [
+      {"price": 3040.10, "importance": "ma", "description": "MA5均线支撑", "strength": "弱"},
+      {"price": 3020.50, "importance": "ma", "description": "MA10均线支撑", "strength": "中"},
+      {"price": 3000.80, "importance": "ma", "description": "MA20均线支撑，接近整数关口", "strength": "强"}
+    ],
+    "resistance_levels": [
+      {"price": 3080.00, "importance": "m15", "description": "15分钟级别前高", "strength": "中"},
+      {"price": 3100.00, "importance": "daily", "description": "整数关口+日线前高", "strength": "强"},
+      {"price": 3100.50, "importance": "daily", "description": "近期日线最高点", "strength": "强"}
+    ],
+    "key_support_today": {"price": 3040.10, "reason": "MA5提供短期支撑，跌破则看3020"},
+    "key_resistance_today": {"price": 3080.00, "reason": "15分钟前高，突破则挑战3100"},
+    "analysis_notes": "当前价格位于MA5上方，短期偏强，但距离3100整数关口压力较近，需关注量能配合"
+  }
+}

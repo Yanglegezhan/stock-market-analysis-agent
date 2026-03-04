@@ -1,0 +1,44 @@
+## 任务
+基于日线数据分析大盘中长期走势预期。
+
+## 日线数据
+{daily_data}
+
+## 均线系统状态
+{ma_system_status}
+
+## 已识别的关键支撑压力位
+{key_levels}
+
+## 输出格式
+
+请严格按以下JSON格式输出中长期预期，不要添加任何其他内容：
+
+```json
+{
+  "current_trend": "上升趋势/下降趋势/震荡趋势",
+  "trend_strength": "强/中/弱",
+  "weekly_expectation": {
+    "direction": "看涨/看跌/震荡",
+    "target_range": [下限, 上限],
+    "key_events": ["关键观察点"]
+  },
+  "monthly_expectation": {
+    "direction": "看涨/看跌/震荡",
+    "target_range": [下限, 上限],
+    "key_levels": ["关键位置"]
+  },
+  "trend_reversal_signals": [
+    {"signal": "信号描述", "trigger_level": 触发价位}
+  ],
+  "confidence": "high/medium/low"
+}
+```
+
+## 要求
+
+1. 判断当前趋势方向和强度
+2. 给出周线级别（1-4周）的预期
+3. 给出月线级别（1-3个月）的预期
+4. 标注趋势转折的关键信号
+5. 给出置信度评级

@@ -1,0 +1,193 @@
+{
+  "examples": [
+    {
+      "description": "示例1：从冰冰点到共振高潮的完整周期",
+      "input": {
+        "sentiment_data": [
+          {"trading_date": "2024-01-10", "market_coefficient": 142.3, "ultra_short_sentiment": 78.5, "loss_effect": 85.2},
+          {"trading_date": "2024-01-11", "market_coefficient": 155.8, "ultra_short_sentiment": 82.1, "loss_effect": 72.3},
+          {"trading_date": "2024-01-12", "market_coefficient": 158.2, "ultra_short_sentiment": 85.6, "loss_effect": 68.5},
+          {"trading_date": "2024-01-15", "market_coefficient": 162.5, "ultra_short_sentiment": 88.3, "loss_effect": 62.1},
+          {"trading_date": "2024-01-16", "market_coefficient": 165.8, "ultra_short_sentiment": 92.5, "loss_effect": 58.3},
+          {"trading_date": "2024-01-17", "market_coefficient": 168.2, "ultra_short_sentiment": 95.2, "loss_effect": 55.8},
+          {"trading_date": "2024-01-18", "market_coefficient": 172.5, "ultra_short_sentiment": 98.6, "loss_effect": 52.3},
+          {"trading_date": "2024-01-19", "market_coefficient": 175.8, "ultra_short_sentiment": 102.3, "loss_effect": 48.5},
+          {"trading_date": "2024-01-22", "market_coefficient": 178.5, "ultra_short_sentiment": 105.8, "loss_effect": 45.2},
+          {"trading_date": "2024-01-23", "market_coefficient": 182.3, "ultra_short_sentiment": 110.2, "loss_effect": 42.8},
+          {"trading_date": "2024-01-24", "market_coefficient": 185.6, "ultra_short_sentiment": 115.3, "loss_effect": 40.5},
+          {"trading_date": "2024-01-25", "market_coefficient": 188.2, "ultra_short_sentiment": 118.5, "loss_effect": 38.2},
+          {"trading_date": "2024-01-26", "market_coefficient": 190.5, "ultra_short_sentiment": 122.8, "loss_effect": 36.5},
+          {"trading_date": "2024-01-29", "market_coefficient": 192.8, "ultra_short_sentiment": 125.2, "loss_effect": 35.8},
+          {"trading_date": "2024-01-30", "market_coefficient": 195.2, "ultra_short_sentiment": 128.5, "loss_effect": 34.2}
+        ],
+        "latest_vs_yesterday": {
+          "market_coefficient": {"latest": 195.2, "yesterday": 192.8, "change_pct": "+1.24%"},
+          "ultra_short_sentiment": {"latest": 128.5, "yesterday": 125.2, "change_pct": "+2.64%"},
+          "loss_effect": {"latest": 34.2, "yesterday": 35.8, "change_pct": "-4.47%"}
+        },
+        "market_details": {
+          "trading_date": "2024-01-30",
+          "index_change": 1.35,
+          "all_a_change": 1.28,
+          "up_count": 3904,
+          "down_count": 1096,
+          "limit_up_count": 65,
+          "consecutive_limit_up_distribution": "2连板18家，3连板12家，4连板6家，5连板3家，6连板1家",
+          "max_consecutive": 6,
+          "yesterday_limit_up_performance": 2.85,
+          "new_100day_high_count": 35,
+          "limit_down_count": 5,
+          "blown_limit_up_rate": 12.5,
+          "large_pullback_count": 38,
+          "yesterday_blown_performance": -0.85
+        }
+      },
+      "output": {
+        "cycle_nodes": [
+          {
+            "trading_date": "2024-01-10",
+            "node_type": "冰冰点",
+            "description": "亏钱效应达到85.2，显著高于大盘系数（142.3）和超短情绪（78.5），三线同时处于低位，市场恐慌情绪浓厚。这是周期的起点，市场处于极度恐慌状态。",
+            "key_indicators": {
+              "market_coefficient": 142.3,
+              "ultra_short_sentiment": 78.5,
+              "loss_effect": 85.2
+            },
+            "confidence": "高"
+          },
+          {
+            "trading_date": "2024-01-11",
+            "node_type": "冰冰点次日修复",
+            "description": "大盘系数率先反弹至155.8（+9.5%），超短情绪跟随至82.1（+4.6%），亏钱效应回落至72.3（-15.1%）。大盘领先修复，这是健康的修复信号。",
+            "key_indicators": {
+              "market_coefficient": 155.8,
+              "ultra_short_sentiment": 82.1,
+              "loss_effect": 72.3
+            },
+            "confidence": "高"
+          },
+          {
+            "trading_date": "2024-01-18",
+            "node_type": "修复后分歧",
+            "description": "大盘系数与超短情绪开始分化，大盘系数172.5，超短情绪98.6，两者涨幅差异扩大。亏钱效应持续下降至52.3，市场出现第二买点特征。",
+            "key_indicators": {
+              "market_coefficient": 172.5,
+              "ultra_short_sentiment": 98.6,
+              "loss_effect": 52.3
+            },
+            "confidence": "中"
+          },
+          {
+            "trading_date": "2024-01-30",
+            "node_type": "共振高潮",
+            "description": "大盘系数（195.2）与超短情绪（128.5）同步上涨，两线斜率相近，均处于历史高位。亏钱效应降至34.2，市场情绪达到高潮。",
+            "key_indicators": {
+              "market_coefficient": 195.2,
+              "ultra_short_sentiment": 128.5,
+              "loss_effect": 34.2
+            },
+            "confidence": "高"
+          }
+        ],
+        "current_stage": "共振高潮",
+        "stage_position": "周期演绎顺序第4阶段，大盘系数与超短情绪同步上涨，进入共振高潮阶段。从冰冰点（1月10日）经过修复（1月11日）、分歧（1月18日），现在进入共振高潮（1月30日），完成了一个完整的上升周期。",
+        "money_making_score": 85,
+        "divergence_analysis": "当前大盘系数（195.2）与超短情绪（128.5）保持同步上涨，未出现明显背离。从环比数据看，大盘系数环比+1.24%，超短情绪环比+2.64%，情绪略强于大盘，但仍属于健康的共振状态。亏钱效应持续下降至34.2（环比-4.47%），说明市场赚钱效应良好。大盘领先情绪的格局保持稳定，这是健康上涨的标志。",
+        "detail_analysis": "最高板为6连板，连板梯队完整（2连板18家，3连板12家，4连板6家，5连板3家，6连板1家），说明市场情绪高涨且持续性强。昨日涨停今日平均表现+2.85%，溢价充足，说明市场对涨停股认可度高。炸板率仅12.5%，处于低位，说明市场分歧较小，一致性强。新增百日新高个股35家，说明市场广度良好，不是局部炒作。从环比数据看，三线指标均向好，特别是超短情绪环比+2.64%，显示市场情绪加速升温。涨停数65家，处于高位，市场活跃度极高。",
+        "strategy_suggestion": "当前处于共振高潮阶段，市场情绪高涨，赚钱效应良好。建议重仓参与，重点关注连板股和新高股。操作上可以追涨强势股，但需设置止盈位。由于已经进入共振高潮，需警惕随时可能出现的退潮风险。一旦出现大盘与情绪背离（特别是顶背离），或炸板率快速上升超过20%，应立即减仓。",
+        "position_advice": "重仓",
+        "risk_warning": "1. 共振高潮后可能快速进入退潮阶段，需警惕情绪转向；2. 连板高度已达6板，高位风险增加，需控制追高风险；3. 市场情绪过热，一旦出现利空可能快速回调；4. 注意设置止盈位，及时兑现利润；5. 关注炸板率变化，一旦快速上升需立即减仓。",
+        "next_node_prediction": "如果大盘系数与超短情绪继续同步上涨，将维持共振高潮状态，但持续时间通常不长（1-3个交易日）。更可能的情况是：1）出现顶背离：大盘系数继续上涨但超短情绪回落，触发条件是超短情绪回落超过3%而大盘系数仍上涨；2）直接进入退潮阶段：大盘系数或超短情绪开始回落，触发条件是任一指标回落超过5%；3）炸板率快速上升超过20%，市场分歧加剧，进入退潮。建议密切关注这三个信号。"
+      }
+    },
+    {
+      "description": "示例2：顶背离后的退潮阶段",
+      "input": {
+        "sentiment_data": [
+          {"trading_date": "2024-02-19", "market_coefficient": 188.5, "ultra_short_sentiment": 125.3, "loss_effect": 38.5},
+          {"trading_date": "2024-02-20", "market_coefficient": 192.3, "ultra_short_sentiment": 128.6, "loss_effect": 36.2},
+          {"trading_date": "2024-02-21", "market_coefficient": 195.8, "ultra_short_sentiment": 130.2, "loss_effect": 35.8},
+          {"trading_date": "2024-02-22", "market_coefficient": 198.5, "ultra_short_sentiment": 128.5, "loss_effect": 38.2},
+          {"trading_date": "2024-02-23", "market_coefficient": 200.2, "ultra_short_sentiment": 125.8, "loss_effect": 42.5},
+          {"trading_date": "2024-02-26", "market_coefficient": 202.5, "ultra_short_sentiment": 122.3, "loss_effect": 48.3},
+          {"trading_date": "2024-02-27", "market_coefficient": 203.8, "ultra_short_sentiment": 118.5, "loss_effect": 52.8},
+          {"trading_date": "2024-02-28", "market_coefficient": 204.2, "ultra_short_sentiment": 115.2, "loss_effect": 58.5},
+          {"trading_date": "2024-02-29", "market_coefficient": 203.5, "ultra_short_sentiment": 112.8, "loss_effect": 62.3},
+          {"trading_date": "2024-03-01", "market_coefficient": 201.8, "ultra_short_sentiment": 110.5, "loss_effect": 68.5},
+          {"trading_date": "2024-03-04", "market_coefficient": 198.5, "ultra_short_sentiment": 108.2, "loss_effect": 72.8},
+          {"trading_date": "2024-03-05", "market_coefficient": 195.2, "ultra_short_sentiment": 105.8, "loss_effect": 78.5},
+          {"trading_date": "2024-03-06", "market_coefficient": 192.3, "ultra_short_sentiment": 103.5, "loss_effect": 82.3},
+          {"trading_date": "2024-03-07", "market_coefficient": 188.5, "ultra_short_sentiment": 101.2, "loss_effect": 88.5},
+          {"trading_date": "2024-03-08", "market_coefficient": 185.2, "ultra_short_sentiment": 98.5, "loss_effect": 92.8}
+        ],
+        "latest_vs_yesterday": {
+          "market_coefficient": {"latest": 185.2, "yesterday": 188.5, "change_pct": "-1.75%"},
+          "ultra_short_sentiment": {"latest": 98.5, "yesterday": 101.2, "change_pct": "-2.67%"},
+          "loss_effect": {"latest": 92.8, "yesterday": 88.5, "change_pct": "+4.86%"}
+        },
+        "market_details": {
+          "trading_date": "2024-03-08",
+          "index_change": -0.85,
+          "all_a_change": -1.25,
+          "up_count": 1856,
+          "down_count": 3144,
+          "limit_up_count": 18,
+          "consecutive_limit_up_distribution": "2连板5家，3连板2家",
+          "max_consecutive": 3,
+          "yesterday_limit_up_performance": -3.25,
+          "new_100day_high_count": 8,
+          "limit_down_count": 25,
+          "blown_limit_up_rate": 35.8,
+          "large_pullback_count": 125,
+          "yesterday_blown_performance": -5.85
+        }
+      },
+      "output": {
+        "cycle_nodes": [
+          {
+            "trading_date": "2024-02-21",
+            "node_type": "共振高潮",
+            "description": "大盘系数（195.8）与超短情绪（130.2）同步处于高位，亏钱效应降至35.8，市场情绪达到高潮。",
+            "key_indicators": {
+              "market_coefficient": 195.8,
+              "ultra_short_sentiment": 130.2,
+              "loss_effect": 35.8
+            },
+            "confidence": "高"
+          },
+          {
+            "trading_date": "2024-02-22",
+            "node_type": "顶背离",
+            "description": "大盘系数继续上涨至198.5，但超短情绪回落至128.5，出现顶背离信号。大盘领先情绪，警惕退潮风险。",
+            "key_indicators": {
+              "market_coefficient": 198.5,
+              "ultra_short_sentiment": 128.5,
+              "loss_effect": 38.2
+            },
+            "confidence": "高"
+          },
+          {
+            "trading_date": "2024-02-28",
+            "node_type": "退潮阶段",
+            "description": "大盘系数达到峰值204.2后开始回落，超短情绪持续下跌至115.2，亏钱效应上升至58.5，市场进入退潮阶段。",
+            "key_indicators": {
+              "market_coefficient": 204.2,
+              "ultra_short_sentiment": 115.2,
+              "loss_effect": 58.5
+            },
+            "confidence": "高"
+          }
+        ],
+        "current_stage": "退潮后期",
+        "stage_position": "周期演绎顺序第5阶段，从共振高潮（2月21日）经过顶背离（2月22日）进入退潮阶段（2月28日），现在处于退潮后期，即将进入新的冰点。",
+        "money_making_score": 25,
+        "divergence_analysis": "从2月22日开始出现明显的顶背离：大盘系数持续上涨至峰值204.2（2月28日），但超短情绪从130.2持续回落至98.5，背离程度严重。这是典型的大盘领先情绪下跌的信号，指数虚高，情绪透支。从环比数据看，大盘系数环比-1.75%，超短情绪环比-2.67%，情绪下跌速度快于大盘，背离持续恶化。亏钱效应快速上升至92.8（环比+4.86%），市场赚钱效应急剧恶化。",
+        "detail_analysis": "最高板仅3连板，连板梯队断裂（2连板5家，3连板2家），说明市场情绪低迷，持续性差。昨日涨停今日平均表现-3.25%，溢价为负，说明市场对涨停股认可度低，追高风险大。炸板率高达35.8%，处于极高位，说明市场分歧极大，一致性差。新增百日新高个股仅8家，市场广度极差。跌停数25家，远超涨停数18家，市场恐慌情绪浓厚。大幅回撤家数125家，说明大量个股高位回落。从环比数据看，三线指标全面恶化，市场进入快速退潮阶段。",
+        "strategy_suggestion": "当前处于退潮后期，市场情绪低迷，赚钱效应极差。建议空仓或轻仓观望，不要轻易抄底。操作上应以防守为主，严格止损。由于已经进入退潮后期，可以开始关注冰点信号，但需等待明确的企稳信号再入场。一旦亏钱效应达到极值（>100）且超短情绪不跌反升，可能出现市场失灵点（破冰信号），这是新周期的起点。",
+        "position_advice": "空仓",
+        "risk_warning": "1. 退潮阶段尚未结束，市场可能继续下跌；2. 炸板率高达35.8%，追高风险极大；3. 连板梯队断裂，市场持续性差；4. 不要轻易抄底，等待明确的企稳信号；5. 严格控制仓位，保持现金为王。",
+        "next_node_prediction": "如果亏钱效应继续上升，将进入冰点或冰冰点阶段。关键触发条件：1）亏钱效应突破100，三线同时处于低位；2）跌停数持续增加，市场恐慌情绪达到极值；3）出现市场失灵点：亏钱效应极高但超短情绪不跌反升，新妖王诞生，破冰信号出现。建议等待这些信号后再考虑入场，不要过早抄底。"
+      }
+    }
+  ]
+}

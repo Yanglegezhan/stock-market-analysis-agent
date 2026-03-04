@@ -1,0 +1,42 @@
+[project]
+name = "market-analysis-agent"
+version = "0.1.0"
+description = "大盘分析Agent - 基于LLM的智能技术分析系统"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "zhipuai>=2.0.0",
+    "openai>=1.0.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+    "mplfinance>=0.12.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.25.0",
+    "akshare>=1.10.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "hypothesis>=6.0.0",
+]
+pdf = [
+    "weasyprint>=60.0",
+    "markdown2>=2.4.0",
+    "fpdf2>=2.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

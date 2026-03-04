@@ -1,0 +1,47 @@
+## 任务
+基于已识别的支撑压力位，分析次日大盘走势预期。
+
+## 当前市场状态
+
+### 支撑压力位
+{support_resistance_result}
+
+### 当前价格位置
+当前价格：{current_price}
+距离最近支撑位：{support_distance}点 ({support_distance_pct}%)
+距离最近压力位：{resistance_distance}点 ({resistance_distance_pct}%)
+位置判断：{position_description}
+
+### 今日走势
+{today_summary}
+
+## 输出格式
+
+请严格按以下JSON格式输出次日预期，不要添加任何其他内容：
+
+```json
+{
+  "opening_scenarios": [
+    {
+      "scenario": "场景名称（如：压力位上方开盘）",
+      "probability": "概率评估（高/中/低）",
+      "expectation": "预期走势",
+      "target_levels": [目标位列表],
+      "stop_levels": [止损位列表]
+    }
+  ],
+  "key_levels_to_watch": [
+    {"price": 数值, "significance": "意义说明"}
+  ],
+  "operation_suggestion": "操作建议",
+  "confidence": "high/medium/low",
+  "risk_warning": "风险提示"
+}
+```
+
+## 要求
+
+1. 给出2-3个可能的开盘场景及对应预期
+2. 每个场景包含目标位和止损位
+3. 给出明确的操作建议
+4. 标注置信度和风险提示

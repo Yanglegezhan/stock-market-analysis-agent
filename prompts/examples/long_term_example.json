@@ -1,0 +1,30 @@
+{
+  "input": {
+    "daily_trend": "温和上升趋势",
+    "ma_arrangement": "多头排列",
+    "key_levels": {
+      "support": [3000, 2950, 2900],
+      "resistance": [3100, 3150, 3200]
+    }
+  },
+  "output": {
+    "current_trend": "上升趋势",
+    "trend_strength": "中",
+    "weekly_expectation": {
+      "direction": "看涨",
+      "target_range": [3080, 3150],
+      "key_events": ["关注3100整数关口突破情况", "观察成交量是否持续放大"]
+    },
+    "monthly_expectation": {
+      "direction": "震荡偏多",
+      "target_range": [3000, 3200],
+      "key_levels": ["3000为多空分水岭", "3200为中期目标位"]
+    },
+    "trend_reversal_signals": [
+      {"signal": "跌破MA20且无法快速收复", "trigger_level": 3000},
+      {"signal": "日线出现放量长阴", "trigger_level": 2980},
+      {"signal": "均线由多头转为空头排列", "trigger_level": 2950}
+    ],
+    "confidence": "medium"
+  }
+}
