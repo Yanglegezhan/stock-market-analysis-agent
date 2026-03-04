@@ -338,24 +338,26 @@ class AKShareDataSource:
             MarketData
         """
         start_date, _ = self._get_trade_days_range(end_date, num_days)
-        
+
         # 只使用真实数据，不使用模拟数据
         df = None
         try:
             print(f"  获取真实{period}分钟数据...")
             df = self._try_em_minute_data(start_date, end_date, period)
             if df is not None and not df.empty:
-                print(f"  ✅ 成功获取 {len(df)} 条真实数据")
+                print(f"  成功获取 {len(df)} 条真实数据")
             else:
-                print(f"  ❌ 返回空数据")
+                print(f"  返回空数据")
         except Exception as e:
-            print(f"  ❌ 获取真实数据失败: {str(e)}")
-            # 不使用模拟数据，直接抛出异常
-            raise ValueError(f"无法获取真实{period}分钟数据: {str(e)}")
-        
+            print(f"  获取真实数据失败: {str(e)}")
+
+        # 如果分钟数据不可用，返回空的MarketData（仅使用日线数据进行分析）
         if df is None or df.empty:
-            raise ValueError(
-                f"所有方法都无法获取{period}分钟数据: {self.config.index_code}"
+            print(f"  警告: {period}分钟数据不可用，将仅使用日线数据")
+            return MarketData(
+                timeframe=timeframe,
+                data=[],
+                moving_averages=[],
             )
         
         # 重命名列以统一格式
@@ -420,10 +422,10 @@ class AKShareDataSource:
             print("    尝试直接调用东方财富API...")
             df = self._call_eastmoney_api_directly(start_date, end_date, period)
             if df is not None and not df.empty:
-                print(f"    ✅ 东方财富API成功，获取 {len(df)} 条数据")
+                print(f"    [OK] 东方财富API成功，获取 {len(df)} 条数据")
                 return df
         except Exception as e:
-            print(f"    ❌ 东方财富API失败: {str(e)[:100]}")
+            print(f"    [FAIL] 东方财富API失败: {str(e)[:100]}")
         
         # 方法2: 使用AkShare的原始接口（可能有连接问题）
         try:
@@ -435,13 +437,69 @@ class AKShareDataSource:
                 end_date=end_date.strftime("%Y-%m-%d") + " 15:00:00",
             )
             if df is not None and not df.empty:
-                print(f"    ✅ AkShare原始接口成功，获取 {len(df)} 条数据")
+                print(f"    [OK] AkShare原始接口成功，获取 {len(df)} 条数据")
                 return df
         except Exception as e:
-            print(f"    ❌ AkShare原始接口失败: {str(e)[:100]}")
+            print(f"    [FAIL] AkShare原始接口失败: {str(e)[:100]}")
         
-        # 如果都失败，抛出异常
-        raise Exception("所有真实数据源都不可用")
+        # 如果都失败，尝试新浪接口
+        try:
+            print("    尝试新浪分钟数据接口...")
+            df = self._call_sina_minute_api(period)
+            if df is not None and not df.empty:
+                print(f"    [OK] 新浪接口成功，获取 {len(df)} 条数据")
+                return df
+        except Exception as e:
+            print(f"    [FAIL] 新浪接口失败: {str(e)[:100]}")
+
+        # 如果都失败，返回空DataFrame而不是抛出异常
+        print(f"    警告: 分钟数据源不可用，将仅使用日线数据")
+        return pd.DataFrame()
+
+    def _call_sina_minute_api(self, period: str) -> pd.DataFrame:
+        """调用新浪分钟数据API"""
+        import requests
+
+        # 新浪接口参数：scale 为分钟周期，datalen 为数据条数
+        # 15分钟最多获取约 500 条，5分钟最多获取约 500 条
+        url = "https://quotes.sina.cn/cn/api/json_v2.php/CN_MarketDataService.getKLineData"
+        params = {
+            "symbol": self.config.index_name,  # sh000001
+            "scale": period,  # 5, 15
+            "ma": "no",
+            "datalen": "500"
+        }
+
+        response = requests.get(url, params=params, timeout=30)
+        response.raise_for_status()
+
+        # 解析JSON响应
+        data = response.json()
+        if not data or not isinstance(data, list):
+            raise Exception("API返回无效数据")
+
+        # 转换为DataFrame格式
+        records = []
+        for item in data:
+            try:
+                records.append({
+                    "时间": item["day"],
+                    "开盘": float(item["open"]),
+                    "收盘": float(item["close"]),
+                    "最高": float(item["high"]),
+                    "最低": float(item["low"]),
+                    "成交量": float(item["volume"]),
+                })
+            except (KeyError, ValueError):
+                continue
+
+        if not records:
+            raise Exception("解析后无有效数据")
+
+        df = pd.DataFrame(records)
+        df["时间"] = pd.to_datetime(df["时间"])
+
+        return df
     
     def _call_eastmoney_api_directly(self, start_date: date, end_date: date, period: str) -> pd.DataFrame:
         """直接调用东方财富API获取分钟数据"""
@@ -625,24 +683,28 @@ class AKShareDataSource:
         analysis_time: Optional[str] = None
     ) -> AnalysisInput:
         """获取所有周期数据
-        
+
         Args:
             analysis_date: 分析日期
             analysis_time: 盘中截止时间（格式HH:MM:SS）
-            
+
         Returns:
             AnalysisInput对象
-            
+
         Requirements: 2.1, 2.2, 2.3, 2.5
         """
         # 获取各周期数据
         daily_data = self.get_daily_data(analysis_date)
         m15_data = self.get_m15_data(analysis_date)
         m5_data = self.get_m5_data(analysis_date, analysis_time)
-        
-        # 获取当前价格（使用最新的5分钟线收盘价）
-        current_price = m5_data.get_latest_ohlcv().close
-        
+
+        # 获取当前价格：优先使用5分钟线，否则使用日线最新收盘价
+        if m5_data.ohlcv_list:
+            current_price = m5_data.get_latest_ohlcv().close
+        else:
+            current_price = daily_data.get_latest_ohlcv().close
+            print(f"  注意: 分钟数据不可用，使用日线收盘价: {current_price:.2f}")
+
         # 构建分析截止时间
         if analysis_time:
             analysis_datetime = datetime.strptime(
@@ -653,7 +715,7 @@ class AKShareDataSource:
             analysis_datetime = datetime.combine(
                 analysis_date, datetime.strptime("15:00:00", "%H:%M:%S").time()
             )
-        
+
         return AnalysisInput(
             analysis_date=analysis_datetime,
             analysis_time=analysis_datetime if analysis_time else None,

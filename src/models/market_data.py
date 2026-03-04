@@ -93,11 +93,11 @@ class MovingAverage(BaseModel):
 
 class MarketData(BaseModel):
     """市场数据模型 - 包含特定时间周期的K线数据和均线数据
-    
+
     Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5
     """
     timeframe: TimeFrame = Field(..., description="时间周期")
-    data: List[OHLCV] = Field(..., min_length=1, description="K线数据列表")
+    data: List[OHLCV] = Field(default_factory=list, description="K线数据列表（可为空，表示该周期数据不可用）")
     moving_averages: Optional[List[MovingAverage]] = Field(
         None, description="均线数据列表"
     )
@@ -124,15 +124,25 @@ class MarketData(BaseModel):
                     )
         return self
 
-    def get_latest_ohlcv(self) -> OHLCV:
+    def get_latest_ohlcv(self) -> Optional[OHLCV]:
         """获取最新的K线数据"""
-        return self.data[-1]
+        return self.data[-1] if self.data else None
 
     def get_latest_ma(self) -> Optional[MovingAverage]:
         """获取最新的均线数据"""
         if self.moving_averages and len(self.moving_averages) > 0:
             return self.moving_averages[-1]
         return None
+
+    @property
+    def ohlcv_list(self) -> List[OHLCV]:
+        """获取K线列表（兼容旧代码）"""
+        return self.data
+
+    @property
+    def ma_list(self) -> List[MovingAverage]:
+        """获取均线列表（兼容旧代码）"""
+        return self.moving_averages or []
 
     model_config = {
         "json_schema_extra": {

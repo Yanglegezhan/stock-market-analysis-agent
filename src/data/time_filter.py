@@ -129,12 +129,30 @@ class TimeIsolationFilter:
                     timeframe=data.timeframe
                 ))
         
-        # 如果过滤后没有数据，保留至少一条
+        # 如果过滤后没有数据，对于分钟线数据返回空数据（允许仅使用日线分析）
         if not filtered_ohlcv:
-            raise ValueError(
-                f"过滤后{data.timeframe.value}数据为空，"
-                f"请检查截止时间({self.cutoff_date})是否正确"
-            )
+            if data.timeframe != TimeFrame.DAILY:
+                # 分钟数据为空，返回空的MarketData
+                return FilterResult(
+                    data=MarketData(
+                        timeframe=data.timeframe,
+                        data=[],
+                        moving_averages=None
+                    ),
+                    warnings=[FilterWarning(
+                        message=f"分钟数据不可用，将仅使用日线数据进行分析",
+                        filtered_count=original_count,
+                        timeframe=data.timeframe
+                    )],
+                    original_count=original_count,
+                    filtered_count=original_count
+                )
+            else:
+                # 日线数据为空，这是错误
+                raise ValueError(
+                    f"过滤后{data.timeframe.value}数据为空，"
+                    f"请检查截止时间({self.cutoff_date})是否正确"
+                )
         
         # 创建新的MarketData对象
         filtered_data = MarketData(

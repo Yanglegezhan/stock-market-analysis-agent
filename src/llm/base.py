@@ -24,7 +24,7 @@ PROVIDER_BASE_URLS = {
     # 国内主流
     "zhipu": "https://open.bigmodel.cn/api/paas/v4",
     "kimi": "https://api.moonshot.cn/v1",
-    "minimax": "https://api.minimax.chat/v1",
+    "minimax": "https://api.minimaxi.com/v1",  # MiniMax 正确的 API 地址
     "qwen": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "deepseek": "https://api.deepseek.com/v1",
     "siliconflow": "https://api.siliconflow.cn/v1",
@@ -41,9 +41,9 @@ PROVIDER_BASE_URLS = {
 
 # 预设的推荐模型配置
 PROVIDER_MODELS = {
-    "zhipu": ["glm-4", "glm-4-flash", "glm-4-plus", "glm-4-air"],
+    "zhipu": ["glm-4-flash", "glm-4", "glm-4-plus", "glm-4-air", "glm-z1-flash"],
     "kimi": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
-    "minimax": ["abab6.5-chat", "abab6.5s-chat", "abab5.5-chat"],
+    "minimax": ["MiniMax-M2.5", "MiniMax-M2.5-highspeed", "MiniMax-M2.1", "abab6.5-chat"],
     "qwen": ["qwen-max", "qwen-plus", "qwen-turbo", "qwen-long"],
     "deepseek": ["deepseek-chat", "deepseek-coder"],
     "siliconflow": ["deepseek-ai/DeepSeek-V3", "Qwen/Qwen2.5-72B-Instruct"],
