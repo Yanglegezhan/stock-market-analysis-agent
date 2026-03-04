@@ -1,0 +1,84 @@
+# 大盘分析Agent配置文件
+# 复制此文件为 config.yaml 并填入你的API密钥
+
+# LLM配置 - 支持所有OpenAI兼容接口的提供商
+llm:
+  # ==================== 选择提供商 ====================
+  # 可选值: zhipu / kimi / minimax / qwen / deepseek / openai / gemini / siliconflow
+  provider: zhipu
+
+  # ==================== 模型名称 ====================
+  # 各提供商推荐模型:
+  #   zhipu:   glm-4, glm-4-flash, glm-4-plus, glm-4-air
+  #   kimi:    moonshot-v1-8k, moonshot-v1-32k, moonshot-v1-128k
+  #   minimax: abab6.5-chat, abab6.5s-chat
+  #   qwen:    qwen-max, qwen-plus, qwen-turbo
+  #   deepseek: deepseek-chat, deepseek-coder
+  #   openai:  gpt-4o, gpt-4-turbo, gpt-3.5-turbo
+  #   gemini:  gemini-pro, gemini-1.5-pro
+  model: glm-4-flash
+
+  # ==================== API密钥 (必填) ====================
+  # 获取方式:
+  #   zhipu:   https://open.bigmodel.cn/
+  #   kimi:    https://platform.moonshot.cn/
+  #   minimax: https://www.minimaxi.com/
+  #   qwen:    https://dashscope.console.aliyun.com/
+  #   deepseek: https://platform.deepseek.com/
+  #   openai:  https://platform.openai.com/
+  api_key: "YOUR_API_KEY_HERE"
+
+  # ==================== 可选配置 ====================
+  temperature: 0.3
+  max_tokens: null  # 不限制输出token数量，让模型自由生成完整响应
+  timeout: 180  # 超时时间180秒
+  max_retries: 3  # 重试次数
+
+  # ==================== 自定义API地址 (可选) ====================
+  # 如果使用自定义兼容接口，可以覆盖默认地址
+  # base_url: "https://your-custom-api.com/v1"
+
+# ==================== AKShare数据源配置 ====================
+# 免费，无需API Token，无频率限制
+akshare:
+  # 上证指数代码
+  index_code: "000001"
+  index_name: "sh000001"
+
+  # 数据获取配置（交易日）
+  daily_days: 65       # 日线数据天数（三个月）
+  m15_days: 5          # 15分钟线数据天数（一周）
+  m5_days: 2           # 5分钟线数据天数（当日）
+
+# ==================== 使用示例 ====================
+#
+# 1. 智谱GLM (默认):
+#    provider: zhipu
+#    model: glm-4-flash
+#    api_key: "your-zhipu-api-key"
+#
+# 2. Kimi (Moonshot):
+#    provider: kimi
+#    model: moonshot-v1-8k
+#    api_key: "your-moonshot-api-key"
+#
+# 3. MiniMax:
+#    provider: minimax
+#    model: abab6.5-chat
+#    api_key: "your-minimax-api-key"
+#
+# 4. 通义千问:
+#    provider: qwen
+#    model: qwen-max
+#    api_key: "your-qwen-api-key"
+#
+# 5. DeepSeek:
+#    provider: deepseek
+#    model: deepseek-chat
+#    api_key: "your-deepseek-api-key"
+#
+# 6. OpenAI:
+#    provider: openai
+#    model: gpt-4o
+#    api_key: "your-openai-api-key"
+#

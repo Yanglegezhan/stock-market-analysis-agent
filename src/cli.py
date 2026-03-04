@@ -114,8 +114,8 @@ def create_parser() -> argparse.ArgumentParser:
     llm_group.add_argument(
         "--provider", "-p",
         type=str,
-        choices=["zhipu", "openai", "deepseek", "qwen"],
-        help="LLM提供商，覆盖配置文件设置"
+        choices=["zhipu", "openai", "deepseek", "qwen", "kimi", "minimax", "gemini", "siliconflow"],
+        help="LLM提供商，覆盖配置文件设置。支持: zhipu/kimi/minimax/qwen/deepseek/openai/gemini/siliconflow"
     )
     llm_group.add_argument(
         "--model", "-m",

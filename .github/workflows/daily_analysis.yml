@@ -5,7 +5,25 @@ on:
     # UTC 时间 12:00 = 北京时间 20:00
     # 周一到周五运行
     - cron: '0 12 * * 1-5'
-  workflow_dispatch:  # 支持手动触发
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'LLM提供商'
+        required: false
+        default: 'zhipu'
+        type: choice
+        options:
+          - zhipu
+          - kimi
+          - minimax
+          - qwen
+          - deepseek
+          - openai
+      model:
+        description: '模型名称'
+        required: false
+        default: 'glm-4-flash'
+        type: string
 
 jobs:
   analyze:
@@ -26,13 +44,54 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
+      - name: Determine LLM config
+        id: llm-config
+        run: |
+          # 使用手动输入或默认值
+          PROVIDER="${{ github.event.inputs.provider || 'zhipu' }}"
+          MODEL="${{ github.event.inputs.model || 'glm-4-flash' }}"
+
+          # 根据提供商选择对应的 API Key Secret
+          case $PROVIDER in
+            zhipu)
+              API_KEY="${{ secrets.ZHIPU_API_KEY }}"
+              ;;
+            kimi)
+              API_KEY="${{ secrets.KIMI_API_KEY }}"
+              MODEL="${{ github.event.inputs.model || 'moonshot-v1-8k' }}"
+              ;;
+            minimax)
+              API_KEY="${{ secrets.MINIMAX_API_KEY }}"
+              MODEL="${{ github.event.inputs.model || 'abab6.5-chat' }}"
+              ;;
+            qwen)
+              API_KEY="${{ secrets.QWEN_API_KEY }}"
+              MODEL="${{ github.event.inputs.model || 'qwen-max' }}"
+              ;;
+            deepseek)
+              API_KEY="${{ secrets.DEEPSEEK_API_KEY }}"
+              MODEL="${{ github.event.inputs.model || 'deepseek-chat' }}"
+              ;;
+            openai)
+              API_KEY="${{ secrets.OPENAI_API_KEY }}"
+              MODEL="${{ github.event.inputs.model || 'gpt-4o' }}"
+              ;;
+            *)
+              API_KEY="${{ secrets.ZHIPU_API_KEY }}"
+              ;;
+          esac
+
+          echo "provider=$PROVIDER" >> $GITHUB_OUTPUT
+          echo "model=$MODEL" >> $GITHUB_OUTPUT
+          echo "api_key=$API_KEY" >> $GITHUB_OUTPUT
+
       - name: Create config file
         run: |
           cat > config.yaml << EOF
           llm:
-            provider: zhipu
-            model: glm-4-flash
-            api_key: "${{ secrets.ZHIPU_API_KEY }}"
+            provider: "${{ steps.llm-config.outputs.provider }}"
+            model: "${{ steps.llm-config.outputs.model }}"
+            api_key: "${{ steps.llm-config.outputs.api_key }}"
             temperature: 0.3
             max_tokens: null
             timeout: 180
@@ -55,6 +114,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: daily-report
+          name: daily-report-${{ steps.llm-config.outputs.provider }}
           path: output/
           retention-days: 7

@@ -5,23 +5,50 @@ from enum import Enum
 
 
 class LLMProviderType(str, Enum):
-    """LLM提供商类型"""
-    ZHIPU = "zhipu"
-    OPENAI = "openai"
-    CLAUDE = "claude"
-    QWEN = "qwen"
-    DEEPSEEK = "deepseek"
-    GEMINI = "gemini"
-    CUSTOM = "custom"  # 自定义OpenAI兼容接口
+    """LLM提供商类型 - 所有提供商使用OpenAI兼容接口"""
+    ZHIPU = "zhipu"          # 智谱GLM
+    OPENAI = "openai"        # OpenAI
+    CLAUDE = "claude"        # Anthropic Claude (通过兼容接口)
+    QWEN = "qwen"            # 阿里通义千问
+    DEEPSEEK = "deepseek"    # DeepSeek
+    GEMINI = "gemini"        # Google Gemini
+    KIMI = "kimi"            # Moonshot Kimi
+    MINIMAX = "minimax"      # MiniMax
+    SILICONFLOW = "siliconflow"  # SiliconFlow
+    ZHIPU_OPEN = "zhipu_open"  # 智谱开放平台 (与zhipu相同)
+    CUSTOM = "custom"        # 自定义OpenAI兼容接口
 
 
-# 预设的base_url配置
+# 预设的base_url配置 - 所有提供商使用OpenAI兼容接口
 PROVIDER_BASE_URLS = {
+    # 国内主流
     "zhipu": "https://open.bigmodel.cn/api/paas/v4",
-    "openai": "https://api.openai.com/v1",
-    "deepseek": "https://api.deepseek.com/v1",
+    "kimi": "https://api.moonshot.cn/v1",
+    "minimax": "https://api.minimax.chat/v1",
     "qwen": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "deepseek": "https://api.deepseek.com/v1",
+    "siliconflow": "https://api.siliconflow.cn/v1",
+
+    # 国际主流
+    "openai": "https://api.openai.com/v1",
     "gemini": "https://generativelanguage.googleapis.com/v1beta",
+
+    # 别名
+    "moonshot": "https://api.moonshot.cn/v1",  # Kimi别名
+    "zhipu_open": "https://open.bigmodel.cn/api/paas/v4",  # 智谱别名
+}
+
+
+# 预设的推荐模型配置
+PROVIDER_MODELS = {
+    "zhipu": ["glm-4", "glm-4-flash", "glm-4-plus", "glm-4-air"],
+    "kimi": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"],
+    "minimax": ["abab6.5-chat", "abab6.5s-chat", "abab5.5-chat"],
+    "qwen": ["qwen-max", "qwen-plus", "qwen-turbo", "qwen-long"],
+    "deepseek": ["deepseek-chat", "deepseek-coder"],
+    "siliconflow": ["deepseek-ai/DeepSeek-V3", "Qwen/Qwen2.5-72B-Instruct"],
+    "openai": ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+    "gemini": ["gemini-pro", "gemini-1.5-pro", "gemini-1.5-flash"],
 }
 
 

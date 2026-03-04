@@ -44,3 +44,4 @@ htmlcov/
 # 输出文件
 output/
 *.png
+.hypothesis/
